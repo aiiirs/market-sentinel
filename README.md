@@ -1,5 +1,7 @@
 # MarketSentinel
 
+[English](README.md) | [简体中文](README.zh-CN.md)
+
 MarketSentinel monitors IOPV premiums for selected China-listed ETFs during A-share trading sessions and sends Feishu (Lark) webhook notifications when configured thresholds are met. It can also send periodic premium summaries and health alerts.
 
 > **Disclaimer**
