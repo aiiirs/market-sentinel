@@ -1,0 +1,29 @@
+# Copy this file to config.toml. Keep real Webhook URLs only in .env.
+
+[monitor]
+poll_seconds = 300
+cooldown_seconds = 1800
+summary_interval_seconds = 1800
+summary_groups = ["示例分组"]
+health_cooldown_seconds = 3600
+failure_alert_after_rounds = 3
+random_delay_min_seconds = 1
+random_delay_max_seconds = 5
+max_retries = 3
+retry_delay_seconds = 2
+request_timeout_seconds = 15
+state_file = "data/state.json"
+log_file = "logs/market_sentinel.log"
+
+[calendar]
+exchange = "XSHG"
+
+[feishu]
+webhook_env = "MARKET_SENTINEL_FEISHU_WEBHOOK"
+health_webhook_env = "MARKET_SENTINEL_HEALTH_WEBHOOK"
+
+# Replace this with ETFs and thresholds suitable for your own use.
+[etfs."513500"]
+name = "示例 ETF"
+threshold = 1.0
+group = "示例分组"

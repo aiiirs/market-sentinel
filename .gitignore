@@ -1,0 +1,18 @@
+# Local configuration and secrets
+.env
+config.toml
+
+# Runtime state and logs
+data/
+logs/
+
+# Python environments and caches
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# OS/editor files
+.DS_Store
+.idea/
+.vscode/
