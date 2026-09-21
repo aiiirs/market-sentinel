@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added a standalone US market-temperature daily report for Nasdaq-100, S&P 500, VIX, VXN and best-effort CNN Fear & Greed context, with restart-safe daily deduplication and Feishu/Lark delivery.
+- Added separate daily-report configuration, runner, environment-variable template and macOS launchd template.
+
 - Expanded English and Simplified Chinese README files with monitoring behavior, complete configuration reference, setup steps, auto-start guidance, and troubleshooting.
 
 - Added a Simplified Chinese README (`README.zh-CN.md`) and language-switch links between the English and Chinese documentation.

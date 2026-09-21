@@ -1,0 +1,10 @@
+[schedule]
+timezone = "Asia/Singapore"
+hour = 9
+minute = 0
+poll_seconds = 60
+send_enabled = false
+[cycle]
+sp500_threshold = 0.08
+nasdaq100_threshold = 0.10
+recovery_ratio = 0.99

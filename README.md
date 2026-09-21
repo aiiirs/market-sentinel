@@ -154,6 +154,23 @@ Create one table for each ETF you want to monitor.
 | `threshold` | Alert condition in percent. An alert is sent when `premium_rate <= threshold`. |
 | `group` | Logical group name. Add it to `summary_groups` to include it in periodic summaries. |
 
+## US market-temperature daily report
+
+The independent us_market_temperature.py task turns Nasdaq-100, S&P 500, VIX, VXN and best-effort CNN Fear & Greed data into one Feishu Markdown card. It is separate from ETF-premium monitoring and has its own configuration and restart-safe send state.
+
+Copy temperature.example.toml to temperature.toml and set the daily-report Webhook in .env:
+
+    US_MARKET_TEMPERATURE_FEISHU_WEBHOOK=https://open.feishu.cn/open-apis/bot/v2/hook/replace-with-your-webhook
+
+The report defaults to Singapore time 09:00. It sends only after a new US stock-market close and will not send the same close twice after a restart. Use the runner to preview without sending or to run continuously:
+
+    ./run_us_market_temperature.sh --preview
+    ./run_us_market_temperature.sh
+
+The report includes daily index changes, the last completed configured drawdown cycle, distance from that cycle peak and the historical high, volatility stages and low-point emotion context. The threshold is configurable in temperature.toml: S&P 500 defaults to 8 percent, Nasdaq-100 to 10 percent. A positive current-vs-previous-peak value means the index is already above that earlier peak.
+
+The first public version intentionally does not show PE. Free public PE data has inconsistent methodology, timing and availability, so it would give a misleading impression of precision. CNN Fear & Greed is optional: an unavailable endpoint is marked unavailable and never replaced with old data.
+
 ## macOS auto-start
 
 The repository includes `launchd/com.marketsentinel.monitor.plist.example`.

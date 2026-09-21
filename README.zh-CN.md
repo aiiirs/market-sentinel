@@ -154,6 +154,23 @@ group = "日本 ETF"
 | `threshold` | 百分比阈值。只有 `溢价率 <= threshold` 才会提醒。 |
 | `group` | 逻辑分组名称。加入 `summary_groups` 后才会出现在定时汇总中。 |
 
+## 美股温度日报
+
+独立脚本 us_market_temperature.py 将纳斯达克100、标普500、VIX、VXN 和尽力获取的 CNN Fear & Greed 指数整理为一张飞书 Markdown 卡片。它与 ETF 溢价监控相互独立，拥有独立配置和跨重启去重状态。
+
+将 temperature.example.toml 复制为 temperature.toml，并在 .env 中填写日报 Webhook：
+
+    US_MARKET_TEMPERATURE_FEISHU_WEBHOOK=https://open.feishu.cn/open-apis/bot/v2/hook/替换为你的地址
+
+默认在新加坡时间每天 09:00 后检查。只有出现新的美股收盘日才会发送，重启后也不会重复发送同一个收盘日。可先预览、不发送，再启动常驻任务：
+
+    ./run_us_market_temperature.sh --preview
+    ./run_us_market_temperature.sh
+
+日报包含指数日变动、达到配置阈值的上一轮已完成大跌、相对该轮前高和历史高点的位置、波动阶段及低点情绪参考。标普500默认阈值为 8%，纳斯达克100默认 10%，均在 temperature.toml 中调整。当前距上一轮前高为正数表示指数已经超过该轮下跌前的高点。
+
+第一版刻意不展示 PE。免费公开 PE 数据的口径、时效和可用性不一致，展示数值会产生不必要的精确性误导。CNN Fear & Greed 仅作可选情绪参考；接口不可用时会明确标记，不会用旧数据替代。
+
 ## macOS 自动启动
 
 仓库提供 `launchd/com.marketsentinel.monitor.plist.example`。
