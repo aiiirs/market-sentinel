@@ -250,7 +250,7 @@ def request_with_retry(
     raise RuntimeError(f"{description} failed after {config.max_retries} attempts") from last_error
 
 
-def fetch_quotes(config: AppConfig) -> dict[str, Quote]:
+def fetch_quotes_from_akshare(config: AppConfig) -> dict[str, Quote]:
     """Fetch all ETF quotes once, then retain only the configured ETF codes."""
     def fetch() -> Any:
         import akshare as ak
@@ -282,6 +282,73 @@ def fetch_quotes(config: AppConfig) -> dict[str, Quote]:
             premium_rate=premium_rate,
         )
     return quotes
+
+
+def fetch_targeted_quotes(config: AppConfig) -> dict[str, Quote]:
+    """Fetch only configured ETFs from Eastmoney, avoiding all-market pagination."""
+    import requests
+
+    codes = sorted(config.etfs)
+    secids = ",".join(
+        f"{1 if code.startswith(("5", "6", "9")) else 0}.{code}" for code in codes
+    )
+    params = {
+        "secids": secids,
+        "fields": "f2,f12,f14,f152,f402,f441",
+        "fltt": "2",
+    }
+
+    def fetch() -> Any:
+        errors: list[str] = []
+        for host in ("push2.eastmoney.com", "82.push2.eastmoney.com", "88.push2.eastmoney.com"):
+            try:
+                response = requests.get(
+                    f"https://{host}/api/qt/ulist.np/get",
+                    params=params,
+                    headers={"User-Agent": "Mozilla/5.0", "Referer": "https://quote.eastmoney.com/"},
+                    timeout=config.request_timeout_seconds,
+                )
+                response.raise_for_status()
+                payload = response.json()
+                rows = payload.get("data", {}).get("diff", [])
+                if payload.get("rc") == 0 and rows:
+                    return rows
+                errors.append(f"{host}: invalid payload")
+            except Exception as error:
+                errors.append(f"{host}: {error}")
+        raise RuntimeError("; ".join(errors))
+
+    rows = request_with_retry(fetch, config, "Eastmoney targeted ETF quote request")
+    quotes: dict[str, Quote] = {}
+    for row in rows:
+        code = str(row.get("f12", "")).zfill(6)
+        if code not in config.etfs:
+            continue
+        price = _as_float(row.get("f2"))
+        iopv = _as_float(row.get("f441"))
+        discount_rate = _as_float(row.get("f402"))
+        if price is None or iopv is None or price <= 0 or iopv <= 0:
+            LOGGER.warning("Skipping %s because targeted quote price or IOPV is invalid", code)
+            continue
+        quotes[code] = Quote(
+            code=code,
+            name=config.etfs[code].name,
+            price=price,
+            iopv=iopv,
+            premium_rate=premium_rate_from_values(price, iopv, discount_rate),
+        )
+    if not quotes:
+        raise RuntimeError("Eastmoney targeted response contained no valid configured ETF quotes")
+    return quotes
+
+
+def fetch_quotes(config: AppConfig) -> dict[str, Quote]:
+    """Prefer targeted quotes; retain AKShare as a compatibility fallback."""
+    try:
+        return fetch_targeted_quotes(config)
+    except Exception as error:
+        LOGGER.warning("Targeted ETF quote request failed; falling back to AKShare: %s", error)
+        return fetch_quotes_from_akshare(config)
 
 
 def _card(title: str, lines: list[str], color: str) -> dict[str, Any]:

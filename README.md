@@ -2,7 +2,7 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
-MarketSentinel monitors the IOPV premium of selected China-listed ETFs during A-share trading sessions. It fetches ETF spot data through AKShare and sends Feishu (Lark) incoming-Webhook notifications when a configured premium threshold is met.
+MarketSentinel monitors the IOPV premium of selected China-listed ETFs during A-share trading sessions. It fetches configured ETF quotes through Eastmoney’s targeted endpoint, with AKShare as a compatibility fallback, and sends Feishu (Lark) incoming-Webhook notifications when a configured premium threshold is met.
 
 > **Disclaimer**
 > This project is for information monitoring and technical experimentation only. It is not investment advice. Public market data may be delayed, incomplete, unavailable, or incorrect. Do not use this project for trading automation.
@@ -12,7 +12,7 @@ MarketSentinel monitors the IOPV premium of selected China-listed ETFs during A-
 For every polling round, MarketSentinel:
 
 1. Checks whether the current time is within the Shanghai A-share continuous sessions (09:30–11:30 and 13:00–15:00, Asia/Shanghai) and is an SSE trading day.
-2. Fetches selected ETF quotes from AKShare / Eastmoney.
+2. Fetches only the configured ETF quotes from Eastmoney first, then falls back to AKShare if necessary.
 3. Converts the upstream `基金折价率` field into this project's IOPV premium convention: positive means premium and negative means discount.
 4. Sends a low-premium card when `premium_rate <= threshold` for an ETF.
 5. Persists alert timestamps locally, so the same ETF will not be repeated during its cooldown period.
@@ -35,7 +35,7 @@ A group with one valid ETF displays one premium rate; a group with multiple ETFs
 
 - Python 3.11 or later.
 - A Feishu/Lark incoming Webhook bot.
-- Network access to AKShare upstream data and Feishu/Lark.
+- Network access to Eastmoney/AKShare upstream data and Feishu/Lark.
 - macOS is optional; only the included `launchd` template is macOS-specific.
 
 ## Quick start
@@ -218,7 +218,7 @@ Webhook URLs are secrets. Read [SECURITY.md](SECURITY.md) before reporting secur
 
 ## Data source
 
-The monitor uses [AKShare](https://github.com/akfamily/akshare), which depends on publicly available upstream market data. Verify upstream terms and data suitability for your own use.
+The monitor queries only its configured ETF codes through Eastmoney’s public quote endpoint, with [AKShare](https://github.com/akfamily/akshare) retained as a fallback. Both rely on publicly available upstream market data; verify upstream terms and data suitability for your own use.
 
 ## License
 

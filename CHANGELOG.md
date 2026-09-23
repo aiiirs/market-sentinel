@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Changed
+
+- Prefer Eastmoney targeted quote requests for configured ETFs, with AKShare retained as a compatibility fallback when the primary request fails.
+- Updated English and Simplified Chinese documentation to describe the resilient quote-source flow.
+
 ### Added
 
 - Added a standalone US market-temperature daily report for Nasdaq-100, S&P 500, VIX, VXN and best-effort CNN Fear & Greed context, with restart-safe daily deduplication and Feishu/Lark delivery.
